@@ -1,0 +1,66 @@
+name: Deploy WebGL to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main   # main に push されたらデプロイ
+
+permissions:
+  contents: write   # gh-pages へ push するために必要
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. リポジトリを clone（LFS も含めて）
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      # 2. LFS 実体を取得（LFS を使っていなくても実害なし）
+      - name: Pull LFS objects
+        run: git lfs pull
+
+      # 3. WebGL ビルド成果物を一時ディレクトリにコピー
+      #    Unity での出力パスが違う場合はここを変更
+      - name: Copy WebGL build
+        run: |
+          mkdir -p webgl-build
+          cp -R C:\Users\shinnosuke-n\OneDrive\Desktop\ModelConfiguratorTest
+
+      # 4. gh-pages ブランチをチェックアウト（なければ作る）
+      - name: Checkout gh-pages branch
+        run: |
+          # すでに gh-pages があればそれを取得、なければ孤立ブランチを作成
+          if git ls-remote --exit-code origin gh-pages; then
+            git fetch origin gh-pages
+            git checkout gh-pages
+          else
+            git checkout --orphan gh-pages
+            rm -rf *
+          fi
+
+      # 5. gh-pages の内容を WebGL ビルドで置き換え
+      - name: Replace contents with WebGL build
+        run: |
+          rm -rf *
+          cp -R ../webgl-build/* .
+          # 404.html が必要ならここで作る
+          # cp index.html 404.html
+
+      # 6. コミット & push
+      - name: Commit and push to gh-pages
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add .
+          # 何も変更がなければスキップ
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Deploy WebGL to gh-pages"
+            git push origin gh-pages
+          fi
