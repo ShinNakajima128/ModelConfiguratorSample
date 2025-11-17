@@ -24,14 +24,34 @@ jobs:
         run: git lfs pull
 
       # 3. WebGL ビルド成果物を一時ディレクトリにコピー
-      #   今のリポジトリ構成:
+      #   現在のリポジトリ構成:
       #   - Build/
       #   - TemplateData/
       #   - index.html
       - name: Copy WebGL build
         run: |
-          mkdir -p webgl-build
-          cp -R Build TemplateData index.html webgl-build/
+          mkdir -p ../webgl-build
+
+          # Build フォルダ
+          if [ -d Build ]; then
+            cp -R Build ../webgl-build/
+          else
+            echo "Warning: Build directory not found"
+          fi
+
+          # TemplateData フォルダ
+          if [ -d TemplateData ]; then
+            cp -R TemplateData ../webgl-build/
+          else
+            echo "Warning: TemplateData directory not found"
+          fi
+
+          # index.html
+          if [ -f index.html ]; then
+            cp index.html ../webgl-build/
+          else
+            echo "Warning: index.html not found"
+          fi
 
       # 4. gh-pages ブランチをチェックアウト（なければ作る）
       - name: Checkout gh-pages branch
