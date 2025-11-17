@@ -3,7 +3,7 @@ name: Deploy WebGL to GitHub Pages
 on:
   push:
     branches:
-      - main   # main に push されたらデプロイ
+      - master   # main に push されたらデプロイ
 
 permissions:
   contents: write   # gh-pages へ push するために必要
@@ -46,7 +46,7 @@ jobs:
       - name: Replace contents with WebGL build
         run: |
           rm -rf *
-          cp -R ../webgl-build/* .
+          cp -R ../Build/* .
           # 404.html が必要ならここで作る
           # cp index.html 404.html
 
