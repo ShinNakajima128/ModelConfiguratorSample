@@ -28,8 +28,8 @@ jobs:
       - name: Copy WebGL build
         run: |
           mkdir -p webgl-build
-          cp -R C:\Users\shinnosuke-n\OneDrive\Desktop\ModelConfiguratorTest
-
+          cp -R Build
+          
       # 4. gh-pages ブランチをチェックアウト（なければ作る）
       - name: Checkout gh-pages branch
         run: |
