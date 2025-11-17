@@ -3,7 +3,7 @@ name: Deploy WebGL to GitHub Pages
 on:
   push:
     branches:
-      - master   # main に push されたらデプロイ
+      - master   # master に push されたらデプロイ
 
 permissions:
   contents: write   # gh-pages へ push するために必要
@@ -24,16 +24,18 @@ jobs:
         run: git lfs pull
 
       # 3. WebGL ビルド成果物を一時ディレクトリにコピー
-      #    Unity での出力パスが違う場合はここを変更
+      #   今のリポジトリ構成:
+      #   - Build/
+      #   - TemplateData/
+      #   - index.html
       - name: Copy WebGL build
         run: |
           mkdir -p webgl-build
-          cp -R Build
-          
+          cp -R Build TemplateData index.html webgl-build/
+
       # 4. gh-pages ブランチをチェックアウト（なければ作る）
       - name: Checkout gh-pages branch
         run: |
-          # すでに gh-pages があればそれを取得、なければ孤立ブランチを作成
           if git ls-remote --exit-code origin gh-pages; then
             git fetch origin gh-pages
             git checkout gh-pages
@@ -46,8 +48,8 @@ jobs:
       - name: Replace contents with WebGL build
         run: |
           rm -rf *
-          cp -R ../Build/* .
-          # 404.html が必要ならここで作る
+          cp -R ../webgl-build/* .
+          # 必要なら 404.html を作る
           # cp index.html 404.html
 
       # 6. コミット & push
@@ -57,7 +59,6 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           git add .
-          # 何も変更がなければスキップ
           if git diff --cached --quiet; then
             echo "No changes to commit."
           else
